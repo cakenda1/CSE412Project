@@ -1,23 +1,59 @@
-import React from "react";
-import { Header } from "semantic-ui-react";
+import React, { Component } from 'react';
+import CanvasJSReact from './canvasjs.react';
+var CanvasJS = CanvasJSReact.CanvasJS;
+var CanvasJSChart = CanvasJSReact.CanvasJSChart;
+ 
+var dataPoints =[];
+class App extends Component {
+ 
+	render() {	
+		const options = {
+			animationEnabled: true,
+			theme: "light2",
+			title:{
+				text: "Gas in US States"
+			},
+			axisX: {
+				title: "Price per Gallon ($)",
+				reversed: true,
+			},
+			axisY: {
+				title: "State",
+				includeZero: true,
+			},
+			data: [{
+				type: "bar",
+				dataPoints: dataPoints
+			}]
+		}
+		return (
+		<div>
+			<CanvasJSChart options = {options} 
+				 onRef={ref => this.chart = ref}
+			/>
+			{/*You can get reference to the chart instance as shown above using onRef. This allows you to access all chart properties and methods*/}
+		</div>
+		);
+	}
+	
+	componentDidMount(){
+		var chart = this.chart;
+    const URL = "http://localhost:5017"
 
-import DashboardGrid from "./components/DashboardGrid";
-import DashboardTable from "./components/DashboardTable";
-
-import "./App.css";
-
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <Header as="h3">Analytics Dashboard connected with Postgres</Header>
-      </header>
-      <div className="App-main">
-        <DashboardGrid />
-        <DashboardTable />
-      </div>
-    </div>
-  );
+		fetch(URL + "/gas")
+		.then(function(response) {
+			return response.json();
+		})
+		.then(function(data) {
+			for (var i = 0; i < data.length; i++) {
+				dataPoints.push({
+					cost: data[i].x,
+					name: data[i].y
+				});
+			}
+			chart.render();
+		});
+	}
 }
-
-export default App;
+ 
+export default App;                  
